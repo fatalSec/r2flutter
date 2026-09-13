@@ -1,0 +1,14 @@
+{
+  "name": "pool-ios-authpass-shift1",
+  "cwd": "test",
+  "cmd": ["../bin/r2flutter", "-p", "bins/ios/AuthPass.app/Frameworks/App.framework/App"],
+  "timeout": 30,
+  "expect": {
+    "contains": [
+      "length:          43268 entries"
+    ],
+    "not_contains": [
+      "PP not resolved"
+    ]
+  }
+}
