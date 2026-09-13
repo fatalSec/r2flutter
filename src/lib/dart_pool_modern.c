@@ -983,8 +983,16 @@ static ModernFillSpec modern_get_fill_spec(const ModernCidCache *cids, int cid) 
 		return modern_fill_spec_kind (MODERN_FILL_CLOSURE);
 	}
 	if (modern_cid_eq (cid, cids->patch_class)) {
-		// FullAOT PatchClass layout differs across snapshot families.
-		return modern_fill_spec_refs ((cids->legacy_format || cids->shift1_format)? 3: 2);
+		// FullAOT PatchClass layout differs across snapshot families. Before
+		// Dart 3.0 UntaggedPatchClass serialised patched_class, origin_class and
+		// script -- three refs up to to_snapshot(). Dart 3.0 dropped origin_class
+		// (and renamed patched_class to wrapped_class), leaving wrapped_class and
+		// script: two refs. The CID_SHIFT1 tag style spans that change (Dart
+		// 2.14-3.3), so the count has to key off the Dart version rather than the
+		// tag style -- 3.0-3.3 are CID_SHIFT1 yet already use the two-ref form, and
+		// reading a third ref there desynced the fill stream and left the isolate
+		// ObjectPool (a later cluster) undecodable.
+		return modern_fill_spec_refs (cids->legacy_format? 3: 2);
 	}
 	static const ModernFillSpecRule rules[] = {
 		{ DART_CID_TYPE_PARAMETERS, MODERN_FILL_REFS, 4, -1, -1, 0, { 0 } },
